@@ -1,30 +1,55 @@
 <?php
-// search-user.php
+// search-task.php
 include_once('./includes/connect_database.php');
 // Database connection and other necessary includes
 
-if(isset($_POST['search_input'])) {
-    $search_input = $_POST['search_input'];
-    $sql = "SELECT id, name, email, avatar FROM users WHERE name LIKE '%$search_input%'";
-
-    $result = mysqli_query($conn, $sql);
-
-    // echo $result
-    
-    // // Check if any rows were returned
-    if(mysqli_num_rows($result) > 0) {
-        // Loop through the results and display them
-        while($row = mysqli_fetch_assoc($result)) {
-            echo "Id: " . $row['id'] . "<br>";
-            echo "Name: " . $row['name'] . "<br>";
-            echo "Email" . $row['email'] . "<br><br>";
-            echo "Avatar" . $row['avatar'] . "<br><br>";
-        }
-    } else {
-        echo "No users found!";
-    }
-    // Display search results here based on the fetched users
-} else {
-    echo "<p>No search query provided.</p>";
+$search = "";
+if (isset($_GET['search'])) {
+    $search = $_GET['search'];
 }
+$sql = "";
+if ($search !== "") {
+    $sql = "SELECT id, name, email, role FROM users WHERE name LIKE '%$search%'";
+} else {
+    $sql = "SELECT id, name, email, role FROM users";
+}
+
+if (isset($_GET['role'])) {
+    if ($_GET['role'] == 'Admin') {
+        $sql = "SELECT id, name, email, role FROM users WHERE role = 'Admin'";
+    } else if ($_GET['role'] == 'Head') {
+        $departmentId = $_GET['departmentId'];
+        $sql = "SELECT u.id AS id, u.name AS name, u.email AS email, u.role AS role 
+        FROM users AS u
+        JOIN users_join_departments AS ujd ON ujd.userId = u.id
+        JOIN departments AS d ON ujd.departmentId = d.id
+        WHERE u.role = 'Head'
+            AND d.id = $departmentId";
+    }
+}
+
+// echo $search;
+
+$result = mysqli_query($conn, $sql);
+
+
+header('Content-type: application/xml');
+$xml = new SimpleXMLElement('<response/>');
+$xml->addChild('isSuccess', true);
+
+
+if(mysqli_num_rows($result) > 0) {
+    $row = mysqli_fetch_assoc($result);
+    while ($row) {
+        $department = $xml->addChild('user');
+        $department->addChild('id', $row['id']);
+        $department->addChild('name', $row['name']);
+        $department->addChild('email', $row['email']);
+        $department->addChild('role', $row['role']);
+        $row = mysqli_fetch_assoc($result);
+    }
+}
+
+// Output the XML
+echo $xml->asXML();
 ?>

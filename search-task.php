@@ -1,31 +1,97 @@
 <?php
-// search-task.php
+session_start();
 include_once('./includes/connect_database.php');
-// Database connection and other necessary includes
 
-if(isset($_POST['search_input'])) {
-    $search_input = $_POST['search_input'];
-    $sql = "SELECT id, name, description, status FROM tasks WHERE name LIKE '%$search_input%' OR description LIKE '%$search_input%'";
-
-    $result = mysqli_query($conn, $sql);
-
-    // echo $result
-    
-    // // Check if any rows were returned
-    if(mysqli_num_rows($result) > 0) {
-        // Loop through the results and display them
-        while($row = mysqli_fetch_assoc($result)) {
-            echo "Id: " . $row['id'] . "<br>";
-            echo "Task Name: " . $row['name'] . "<br>";
-            echo "Description: " . $row['description'] . "<br>";
-            echo "Assignee" . $row['assignee'] . "<br><br>";
-            echo "Status" . $row['status'] . "<br><br>";
-        }
-    } else {
-        echo "No tasks found!";
-    }
-    // Display search results here based on the fetched tasks
-} else {
-    echo "<p>No search query provided.</p>";
+$search = "";
+if (isset($_GET['search'])) {
+    $search = $_GET['search'];
 }
+
+$userId = $_SESSION['id'];
+$sql = "";
+if ($_SESSION['role'] == 'Admin' || $_SESSION['role'] == 'Staff') {
+    $sql = "SELECT 
+    t.*, 
+    ua.name AS assignedTo,
+    uc.name AS createdBy
+    FROM 
+        tasks AS t
+    LEFT JOIN 
+        users AS ua ON t.assignedTo = ua.id
+    LEFT JOIN 
+        users AS uc ON t.createdBy = uc.id
+    WHERE (t.assignedTo = $userId)";
+
+    if ($search !== "") {
+        $sql = "$sql 
+        AND (t.description LIKE '%$search%' OR t.name LIKE '%$search%')";
+    }
+}
+
+if ($_SESSION['role'] == 'Director') {
+    $sql = "SELECT 
+    t.*, 
+    ua.name AS assignedTo,
+    uc.name AS createdBy
+    FROM 
+        tasks AS t
+    LEFT JOIN 
+        users AS ua ON t.assignedTo = ua.id
+    LEFT JOIN 
+        users AS uc ON t.createdBy = uc.id
+    WHERE (t.createdBy = $userId)";
+
+    if ($search !== "") {
+        $sql = "$sql 
+        AND (t.description LIKE '%$search%' OR t.name LIKE '%$search%')";
+    }
+}
+
+if ($_SESSION['role'] == 'Head') {
+    $sql = "SELECT 
+    t.*, 
+    ua.name AS assignedTo,
+    uc.name AS createdBy
+    FROM 
+        tasks AS t
+    LEFT JOIN 
+        users AS ua ON t.assignedTo = ua.id
+    LEFT JOIN 
+        users AS uc ON t.createdBy = uc.id
+    WHERE (t.assignedTo = $userId OR t.createdBy = $userId)";
+
+    if ($search !== "") {
+        $sql = "$sql 
+        AND (t.description LIKE '%$search%' OR t.name LIKE '%$search%')";
+    }
+}
+
+// echo $sql;
+
+
+$result = mysqli_query($conn, $sql);
+
+header('Content-type: application/xml');
+$xml = new SimpleXMLElement('<response/>');
+$xml->addChild('isSuccess', true);
+
+
+if(mysqli_num_rows($result) > 0) {
+    $row = mysqli_fetch_assoc($result);
+    while ($row) {
+        $department = $xml->addChild('task');
+        $department->addChild('id', $row['id']);
+        $department->addChild('name', $row['name']);
+        $department->addChild('description', $row['description']);
+        $department->addChild('status', $row['status']);
+        $department->addChild('reviewStatus', $row['reviewStatus']);
+        $department->addChild('deadline', $row['deadline']);
+        $department->addChild('createdBy', $row['createdBy']);
+        $department->addChild('assignedTo', $row['assignedTo']);
+        $row = mysqli_fetch_assoc($result);
+    }
+}
+
+// Output the XML
+echo $xml->asXML();
 ?>

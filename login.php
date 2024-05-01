@@ -1,7 +1,7 @@
-<?php
-session_start();
-include_once('includes/header.php');
-?>
+<header>
+    <title>Login</title>
+</header>
+
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
@@ -24,35 +24,6 @@ include_once('includes/header.php');
                     return;
                 }
 
-
-                // $.ajax({
-                //     url: "validation.php", // URL to send the AJAX request
-                //     type: "POST", // HTTP method used
-                //     data: { 
-                //       username,
-                //       password, 
-                //     }, // Data to send (search query)
-                //     success: function(data) {
-                //         // console.log(data)
-                //         // console.log('test')
-                //         // $("#task-list").html(data); // Update search results on success
-                //         // Navigate to the desired page
-                //         // window.location.href = "add-task.php";
-                //         console.log(data);
-
-                //         const parser = new DOMParser();
-                //         const xmlDoc = parser.parseFromString(data, "text/xml");
-                //         console.log(xmlDoc);
-
-                //         // Now you can traverse and manipulate xmlDoc as a regular XML document
-                //         // For example:
-                //         // const isSuccess = xmlDoc.getElementsByTagName("isSuccess")[0].textContent;
-                //         // const message = xmlDoc.getElementsByTagName("message")[0].textContent;
-                //         // const userId = xmlDoc.getElementsByTagName("id")[0].textContent;
-                //         // const userName = xmlDoc.getElementsByTagName("name")[0].textContent;
-                //     }
-                // })
-
                 // Create a new XMLHttpRequest object
                 var xhr = new XMLHttpRequest();
 
@@ -68,6 +39,8 @@ include_once('includes/header.php');
                             const xmlDoc = xhr.responseXML;
 
                             // // Extracting data from the XML response
+                            console.log(xmlDoc);
+  
                             const isSuccess = xmlDoc.getElementsByTagName("isSuccess")[0].textContent;
                             if (isSuccess) {
                               window.location.href = "index.php";
@@ -94,6 +67,24 @@ include_once('includes/header.php');
     });
 
 </script>
+
+<html lang="en">
+<head>
+  <title>Web assignment</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../public/css/styles.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<header>
+    <div class = "bg-dark">
+        <div class="container login-navbar">
+        </div>
+    </div>
+</header>
+</html>
 
 <body>
 <link href = "./public/css/login.css" rel="stylesheet">
