@@ -31,7 +31,14 @@ function searchUser(searchQuery) {
                     <th scope="row">${id}</th>
                     <td>${name}</td>
                     <td>${email}</td>
-                    <td>${role}</td>
+                    <td>
+                        <select class="role-select form-control" data-user-id="${id}" value="${role}">
+                            <option value="Admin" ${role === 'Admin' ? 'selected' : ''}>Administrator</option>
+                            <option value="Director" ${role === 'Director' ? 'selected' : ''}>Director</option>
+                            <option value="Head" ${role === 'Head' ? 'selected' : ''}>Department Head</option>
+                            <option value="Staff" ${role === 'Staff' ? 'selected' : ''}>Staff</option>
+                        </select>
+                    </td>
                 </tr>
                 `;
             });
